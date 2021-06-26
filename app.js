@@ -2,8 +2,8 @@ require("dotenv").config();
 const express = require("express");
 const nodemailer = require("nodemailer");
 const mongoose = require("mongoose");
-const pickupLines = require("./pickup");
-const dbConnect = require("./dbConnect");
+const pickupLines = require("pickup");
+const dbConnect = require("dbConnect");
 
 const app = express();  
 const PORT = process.env.PORT || 3000; 
