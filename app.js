@@ -10,7 +10,7 @@ const PORT = process.env.PORT || 3000;
 
 const { Schema } = mongoose;
 
-const timeDiff = 3600*24*6;
+const timeDiff = 518400;
 let sendMailTimer;
 
 const indexSchema = new Schema({
@@ -64,7 +64,6 @@ async function calculateTiming() {
         if(err) {
             console.log(err);
         } else {
-            console.log(indexes);
             return indexes;
         }
     });
@@ -72,7 +71,6 @@ async function calculateTiming() {
     const lastIndex = lastPickup[0].index;
     const lastTime = lastPickup[0].last;
 
-    console.log(lastPickup,lastIndex,lastTime);
     let rightNow = getMyTimeNow();
     let bSend = isMailTime(rightNow, lastTime);
 
@@ -93,7 +91,7 @@ function sendMyMail(line, lastIndex, rightNow) {
     const mailOptions = {
         from: process.env.SENDER, 
         to: process.env.RECEIVER, 
-        subject: 'PicKupLine '+(lastIndex + 1)+'👼', 
+        subject: 'PicKupLine '+(lastIndex + 2)+'👼', 
         html: '<h3 style="color:#ba070d">Dear '+ process.env.Name +' !👸❣</h3><p><strong>'+ line +'</strong> 👼<p>'
       };
 
