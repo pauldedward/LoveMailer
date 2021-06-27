@@ -74,7 +74,7 @@ async function calculateTiming() {
     let rightNow = getMyTimeNow();
     let bSend = isMailTime(rightNow, lastTime);
 
-    if (lastIndex < 180) {          
+    if (lastIndex < pickupLines.length - 1) {          
         if(bSend) {
             let line = pickupLines[lastIndex + 1];
             sendMyMail(line, lastIndex, rightNow);
@@ -91,7 +91,7 @@ function sendMyMail(line, lastIndex, rightNow) {
     const mailOptions = {
         from: process.env.SENDER, 
         to: process.env.RECEIVER, 
-        subject: 'PicKupLine '+(lastIndex + 2)+'👼', 
+        subject: 'PickupLine '+(lastIndex + 2)+'👼', 
         html: '<h3 style="color:#ba070d">Dear '+ process.env.Name +' !👸❣</h3><p><strong>'+ line +'</strong> 👼<p>'
       };
 

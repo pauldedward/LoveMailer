@@ -130,7 +130,7 @@ let pickupLines = [
     "I can’t tell if that was an earthquake, or if you just seriously rocked my world.",
     "I just had to tell you, your beauty made me truly appreciate being able to see.",
     "If you were a fruit, you’d be a ‘fine-apple.’",
-    "I don’t know your name, but I’m sure it’s as beautiful as you are. I’m (your name).",
+    "I don’t know your name, but I’m sure it’s as beautiful as you are.",
     "You are astoundingly gorgeous, but I can tell that’s the least interesting thing about you. I’d love to know more.",
     "The sparkle in your eyes is so bright, the sun must be jealous.",
     "One night I looked up at the stars and thought, ‘Wow, how beautiful.’ But now that I’m looking at you, nothing else can compare.",
