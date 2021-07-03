@@ -4,13 +4,16 @@ const nodemailer = require("nodemailer");
 const mongoose = require("mongoose");
 const pickupLines = require("./pickup");
 const dbConnect = require("./dbConnect");
+const http = require('http'); 
 
 const app = express();  
 const PORT = process.env.PORT || 3000; 
 
 const { Schema } = mongoose;
 
-const timeDiff = 518400;
+const timeDiff = process.env.TIMEDIFF;
+const dayToSend = process.env.DAYTOSEND;
+
 let sendMailTimer;
 
 const indexSchema = new Schema({
@@ -38,7 +41,7 @@ dbConnect.then(() => {
 
     sendMailTimer = setInterval(()=> {
         const thisDay = new Date();
-        if(thisDay.getDay() == 6) {
+        if(thisDay.getDay() == dayToSend) {
             calculateTiming();
         }
     }, 21600000);
@@ -119,6 +122,29 @@ app.get("/", (req, res) => {
 
 });
 
+//prevent dyno from sleeping
+function startKeepAlive() {
+    setInterval(function() {
+        let options = {
+            host: 'love-mailer.herokuapp.com',
+            port: 80,
+            path: '/'
+        };
+        http.get(options, function(res) {
+            res.on('data', function(chunk) {
+                try {
+                    // console.log("HEROKU RESPONSE: " + chunk);
+                } catch (err) {
+                    console.log(err.message);
+                }
+            });
+        }).on('error', function(err) {
+            console.log("Error: " + err.message);
+        });
+    }, 20 * 60 * 1000); 
+}
+
 app.listen(PORT, () => {
-  console.log("Server started listening on port : ", PORT);
+    console.log("Server started listening on port : ", PORT);
+    startKeepAlive();
 });
