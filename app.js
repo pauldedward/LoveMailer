@@ -44,7 +44,7 @@ dbConnect.then(() => {
         if(thisDay.getDay() == dayToSend) {
             calculateTiming();
         }
-    }, 21600000);
+    }, process.env.INTERVALTIME);
     
 });
 
