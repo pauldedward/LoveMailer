@@ -95,7 +95,7 @@ function sendMyMail(line, lastIndex, rightNow) {
         from: process.env.SENDER, 
         to: process.env.RECEIVER, 
         subject: 'PickupLine '+(lastIndex + 2)+'👼', 
-        html: '<h3 style="color:#ba070d">Dear '+ process.env.Name +' !👸❣</h3><p><strong>'+ line +'</strong> 👼<p>'
+        html: '<h3 style="color:#ba070d">Dear '+ process.env.NAME +' !👸❣</h3><p><strong>'+ line +'</strong> 👼<p>'
       };
 
       transporter.sendMail(mailOptions, function (err, info) {
