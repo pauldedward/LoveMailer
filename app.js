@@ -4,10 +4,12 @@ const nodemailer = require("nodemailer");
 const mongoose = require("mongoose");
 const pickupLines = require("./pickup");
 const dbConnect = require("./dbConnect");
-const http = require('http'); 
+const http = require("http");
 
-const app = express();  
-const PORT = process.env.PORT || 3000; 
+let transporter;
+
+const app = express();
+const PORT = process.env.PORT || 3000;
 
 const { Schema } = mongoose;
 
@@ -17,54 +19,40 @@ const dayToSend = process.env.DAYTOSEND;
 let sendMailTimer;
 
 const indexSchema = new Schema({
-    "index": {
-        "type": "Number"
+    index: {
+        type: "Number",
     },
-    "last" : {
-        "type" : "Number"
-    }
+    last: {
+        type: "Number",
+    },
 });
 
 const Index = mongoose.model("index", indexSchema);
 
-
-const transporter = nodemailer.createTransport({
- service: 'gmail',
- 
- auth: {
-        user: process.env.SENDER,
-        pass: process.env.USERPASSWORD
-    }
-});
-
 dbConnect.then(() => {
-
-    sendMailTimer = setInterval(()=> {
+    sendMailTimer = setInterval(() => {
         const thisDay = new Date();
-        if(thisDay.getDay() == dayToSend) {
+        if (thisDay.getDay() == dayToSend) {
             calculateTiming();
         }
     }, process.env.INTERVALTIME);
-    
 });
 
-
 function getMyTimeNow() {
-    return Math.floor(Date.now()/1000);
+    return Math.floor(Date.now() / 1000);
 }
 
 function isMailTime(rightNow, lastTime) {
-    const newDiff = rightNow - lastTime; 
-    if(newDiff >= timeDiff) {
-      return true; 
-    } 
+    const newDiff = rightNow - lastTime;
+    if (newDiff >= timeDiff) {
+        return true;
+    }
     return false;
 }
 
-
 async function calculateTiming() {
-    const lastPickup = await Index.find({},(err, indexes) => {
-        if(err) {
+    const lastPickup = await Index.find({}, (err, indexes) => {
+        if (err) {
             console.log(err);
         } else {
             return indexes;
@@ -77,71 +65,80 @@ async function calculateTiming() {
     let rightNow = getMyTimeNow();
     let bSend = isMailTime(rightNow, lastTime);
 
-    if (lastIndex < pickupLines.length - 1) {          
-        if(bSend) {
+    if (lastIndex < pickupLines.length - 1) {
+        if (bSend) {
             let line = pickupLines[lastIndex + 1];
             sendMyMail(line, lastIndex, rightNow);
-        }    
+        }
     } else {
         clearInterval(sendMailTimer);
     }
 }
 
-
-
-function sendMyMail(line, lastIndex, rightNow) {
+async function sendMyMail(line, lastIndex, rightNow) {
+    transporter = await nodemailer.createTransport({
+        host: "smtp.gmail.com",
+        port: 465,
+        secure: true,
+        auth: {
+            type: "OAuth2",
+            user: process.env.SENDER,
+            clientId: process.env.CLIENTID,
+            clientSecret: process.env.CLIENTSECRET,
+            refreshToken: process.env.REFRESHTOKEN,
+            accessToken: process.env.ACCESSTOKEN,
+        },
+        tls: {
+            rejectUnauthorized: false,
+        },
+    });
 
     const mailOptions = {
-        from: process.env.SENDER, 
-        to: process.env.RECEIVER, 
-        subject: 'PickupLine '+(lastIndex + 2)+'👼', 
-        html: '<h3 style="color:#ba070d">Dear '+ process.env.NAME +' !👸❣</h3><p><strong>'+ line +'</strong> 👼<p>'
-      };
+        from: process.env.SENDER,
+        to: process.env.RECEIVER,
+        subject: "PickupLine " + (lastIndex + 2) + "👼",
+        html: '<h3 style="color:#ba070d">Dear ' + process.env.NAME + " !👸❣</h3><p><strong>" + line + "</strong> 👼<p>",
+    };
 
-      transporter.sendMail(mailOptions, function (err, info) {
-         if(err)
-           console.log(err)
-         else {
+    transporter.sendMail(mailOptions, function (err, info) {
+        if (err) console.log(err);
+        else {
             console.log(info);
-            Index.replaceOne({index : lastIndex}, {index : lastIndex + 1, last : rightNow}, (err, res)=> {
-                if(err) {
+            Index.replaceOne({ index: lastIndex }, { index: lastIndex + 1, last: rightNow }, (err, res) => {
+                if (err) {
                     console.log(err);
                 }
-            });  
-         } 
-      });
-      
+            });
+        }
+    });
 }
 
-
-app.get("/", (req, res) => {  
-
-  return res.send({
-    status: "Healthy",
-  });
-
+app.get("/", (req, res) => {
+    return res.send({
+        status: "Healthy",
+    });
 });
 
 //prevent dyno from sleeping
 function startKeepAlive() {
-    setInterval(function() {
+    setInterval(function () {
         let options = {
-            host: 'love-mailer.herokuapp.com',
+            host: "love-mailer.herokuapp.com",
             port: 80,
-            path: '/'
+            path: "/",
         };
-        http.get(options, function(res) {
-            res.on('data', function(chunk) {
+        http.get(options, function (res) {
+            res.on("data", function (chunk) {
                 try {
                     // console.log("HEROKU RESPONSE: " + chunk);
                 } catch (err) {
                     console.log(err.message);
                 }
             });
-        }).on('error', function(err) {
+        }).on("error", function (err) {
             console.log("Error: " + err.message);
         });
-    }, 20 * 60 * 1000); 
+    }, 20 * 60 * 1000);
 }
 
 app.listen(PORT, () => {
