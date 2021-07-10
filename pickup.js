@@ -1,4 +1,4 @@
-let pickupLines = [ 
+let pickupLines = [
     "Are you a parking ticket? ‘Cause you’ve got fine written all over you.",
     "There must be something wrong with my eyes, I can’t take them off you.",
     "Do you have a pencil? Cause I want to erase your past and write our future.",
@@ -179,11 +179,11 @@ let pickupLines = [
     "You look like you know how to have a good time. Been on any adventures lately?",
     "You know, I’m actually terrible at flirting. How about you try to pick me up instead?",
     "Do you have a name, or can I just call you ‘mine?’",
-    "I’m not sure what it is yet, but something about you seems really interesting." 
-    ];
+    "I’m not sure what it is yet, but something about you seems really interesting.",
+];
 
-    function pickup() {
-        return pickupLines;
-    }
+function pickup() {
+    return pickupLines;
+}
 
-    module.exports =  pickup();
+module.exports = pickup();
