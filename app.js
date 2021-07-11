@@ -1,20 +1,23 @@
 require("dotenv").config();
 const express = require("express");
 const nodemailer = require("nodemailer");
+const { google } = require("googleapis");
 const mongoose = require("mongoose");
 const pickupLines = require("./pickup");
 const dbConnect = require("./dbConnect");
 const http = require("http");
 
-let transporter;
+const oauth2Client = new google.auth.OAuth2(process.env.CLIENT_ID, process.env.CLIENT_SECRET, process.env.REDIRECT_URI);
+
+oauth2Client.setCredentials({ refresh_token: process.env.REFRESH_TOKEN });
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 const { Schema } = mongoose;
 
-const timeDiff = process.env.TIMEDIFF;
-const dayToSend = process.env.DAYTOSEND;
+const timeDiff = process.env.TIME_DIFF;
+const dayToSend = process.env.DAY_TO_SEND;
 
 let sendMailTimer;
 
@@ -35,7 +38,7 @@ dbConnect.then(() => {
         if (thisDay.getDay() == dayToSend) {
             calculateTiming();
         }
-    }, process.env.INTERVALTIME);
+    }, process.env.INTERVAL_TIME);
 });
 
 function getMyTimeNow() {
@@ -76,41 +79,45 @@ async function calculateTiming() {
 }
 
 async function sendMyMail(line, lastIndex, rightNow) {
-    transporter = await nodemailer.createTransport({
-        host: "smtp.gmail.com",
-        port: 465,
-        secure: true,
-        auth: {
-            type: "OAuth2",
-            user: process.env.SENDER,
-            clientId: process.env.CLIENTID,
-            clientSecret: process.env.CLIENTSECRET,
-            refreshToken: process.env.REFRESHTOKEN,
-            accessToken: process.env.ACCESSTOKEN,
-        },
-        tls: {
-            rejectUnauthorized: false,
-        },
-    });
+    try {
+        const accessToken = await oauth2Client.getAccessToken();
 
-    const mailOptions = {
-        from: process.env.SENDER,
-        to: process.env.RECEIVER,
-        subject: "PickupLine " + (lastIndex + 2) + "👼",
-        html: '<h3 style="color:#ba070d">Dear ' + process.env.NAME + " !👸❣</h3><p><strong>" + line + "</strong> 👼<p>",
-    };
+        const transporter = nodemailer.createTransport({
+            service: "gmail",
+            auth: {
+                type: "OAuth2",
+                user: process.env.SENDER,
+                clientId: process.env.CLIENT_ID,
+                clientSecret: process.env.CLIENT_SECRET,
+                refreshToken: process.env.REFRESH_TOKEN,
+                accessToken: accessToken,
+            },
+            tls: {
+                rejectUnauthorized: false,
+            },
+        });
 
-    transporter.sendMail(mailOptions, function (err, info) {
-        if (err) console.log(err);
-        else {
-            console.log(info);
-            Index.replaceOne({ index: lastIndex }, { index: lastIndex + 1, last: rightNow }, (err, res) => {
-                if (err) {
-                    console.log(err);
-                }
-            });
-        }
-    });
+        const mailOptions = {
+            from: process.env.SENDER,
+            to: process.env.RECEIVER,
+            subject: "PickupLine " + (lastIndex + 2) + "👼",
+            html: '<h3 style="color:#ba070d">Dear ' + process.env.NAME + " !👸❣</h3><p><strong>" + line + "</strong> 👼<p>",
+        };
+
+        transporter.sendMail(mailOptions, function (err, info) {
+            if (err) console.log(err);
+            else {
+                console.log(info);
+                Index.replaceOne({ index: lastIndex }, { index: lastIndex + 1, last: rightNow }, (err, res) => {
+                    if (err) {
+                        console.log(err);
+                    }
+                });
+            }
+        });
+    } catch (error) {
+        console.log(error);
+    }
 }
 
 app.get("/", (req, res) => {
