@@ -71,6 +71,7 @@ async function calculateTiming() {
     let bSend = isMailTime(rightNow, lastTime);
 
     if (lastIndex < pickupLines.length - 1) {
+        console.log(bSend);
         if (bSend) {
             let line = pickupLines[lastIndex + 1];
             sendMyMail(line, lastIndex, rightNow);
