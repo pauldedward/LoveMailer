@@ -35,6 +35,7 @@ const Index = mongoose.model("index", indexSchema);
 dbConnect.then(() => {
     sendMailTimer = setInterval(() => {
         const thisDay = new Date();
+        console.log("set interval executed")
         if (thisDay.getDay() == dayToSend) {
             calculateTiming();
         }
@@ -54,6 +55,7 @@ function isMailTime(rightNow, lastTime) {
 }
 
 async function calculateTiming() {
+    console.log("calculateTiming executed")
     const lastPickup = await Index.find({}, (err, indexes) => {
         if (err) {
             console.log(err);
@@ -74,11 +76,13 @@ async function calculateTiming() {
             sendMyMail(line, lastIndex, rightNow);
         }
     } else {
+        console.log("I am done")
         clearInterval(sendMailTimer);
     }
 }
 
 async function sendMyMail(line, lastIndex, rightNow) {
+    console.log("sendMyMail executed")
     try {
         const accessToken = await oauth2Client.getAccessToken();
 
