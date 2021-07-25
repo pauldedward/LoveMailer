@@ -132,26 +132,27 @@ app.get("/", (req, res) => {
 });
 
 //prevent dyno from sleeping
-function startKeepAlive() {
-    setInterval(function () {
-        let options = {
-            host: "love-mailer.herokuapp.com",
-            port: 80,
-            path: "/",
-        };
-        http.get(options, function (res) {
-            res.on("data", function (chunk) {
-                try {
-                    // console.log("HEROKU RESPONSE: " + chunk);
-                } catch (err) {
-                    console.log(err.message);
-                }
-            });
-        }).on("error", function (err) {
-            console.log("Error: " + err.message);
-        });
-    }, 20 * 60 * 1000);
-}
+//Eats up my heroku dyno hours :(
+// function startKeepAlive() {
+//     setInterval(function () {
+//         let options = {
+//             host: "love-mailer.herokuapp.com",
+//             port: 80,
+//             path: "/",
+//         };
+//         http.get(options, function (res) {
+//             res.on("data", function (chunk) {
+//                 try {
+//                     // console.log("HEROKU RESPONSE: " + chunk);
+//                 } catch (err) {
+//                     console.log(err.message);
+//                 }
+//             });
+//         }).on("error", function (err) {
+//             console.log("Error: " + err.message);
+//         });
+//     }, 20 * 60 * 1000);
+// }
 
 app.listen(PORT, () => {
     console.log("Server started listening on port : ", PORT);
