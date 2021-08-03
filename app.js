@@ -36,7 +36,7 @@ dbConnect.then(() => {
     sendMailTimer = setInterval(() => {
         const thisDay = new Date();
         console.log("set interval executed")
-        if (thisDay.getDay() == dayToSend) {
+        if (thisDay.getDay() == dayToSend[0] || thisDay.getDay() == dayToSend[1]) {
             calculateTiming();
         }
     }, process.env.INTERVAL_TIME);
